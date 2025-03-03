@@ -1,0 +1,87 @@
+本プロジェクトのDockerコンテナやDockerコンポーズの運用方法について記載します。
+データベースの接続確認方法も記載します。
+
+
+【Dockerコンテナの基本運用】
+コンテナとイメージを削除
+    docker-compose down --rmi all --volumes --remove-orphans
+コンテナ停止
+    docker-compose down
+コンテナ起動
+    docker-compose up --build
+バックグラウンドでコンテナ起動
+    docker-compose up -d
+ログの確認
+    docker-compose logs -f
+    docker-compose logs -f backend
+コンテナに入る
+    docker exec -it <container_name> /bin/sh
+バックエンドの疎通確認（フロントコンテナ内から）
+    curl http://backend:8000/docs
+ホットリロードの有効化
+    Next.js (frontend) と FastAPI (backend) の volume を設定し、ソースコード変更時に即反映されるようにする
+
+
+【開発環境】
+・Dockerfile.dev
+・docker-compose.yml + docker-compose.override.yml
+    ・docker-compose.yml には共通の設定を記述
+    ・docker-compose.override.yml には開発環境の設定を記述
+    ・docker-compose.override.yml は、docker-compose.yml と同じディレクトリに配置することで、
+      docker-compose up すると、自動で override.yml の内容が適用される。
+・起動方法
+    ①開発環境を起動
+    docker compose up --build
+        --build をつけることで、Dockerfile.dev の設定でビルドされる。
+        デフォルトでdocker-compose.ymlを自動的にdocker-compose.override.ymlで上書きして読み込まれるため、開発用の設定が適用される。
+    ②動作確認
+    バックエンド
+        curl http://localhost:8000/
+        または、ブラウザで http://localhost:8000/docs にアクセス
+    フロントエンド
+        curl http://localhost:3000/
+        または、ブラウザで http://localhost:3000/ にアクセス
+
+
+【本番環境】
+・Dockerfile.prod
+・docker-compose.yml + docker-compose.prod.yml
+・起動方法
+    ①本番環境を起動
+    docker compose -f docker-compose.yml -f docker-compose.prod.yml up --build
+        -f オプションでファイルを指定することで、docker-compose.prod.yml を読み込む。
+        -fオプションを使用すると指定したファイルのみが読み込まれるため、docker-compose.override.yml は読み込まれない。
+    ②動作確認
+    バックエンド
+        curl http://localhost:8000/
+        または、ブラウザで http://localhost:8000/docs にアクセス
+    フロントエンド
+        curl http://localhost:3000/
+        または、ブラウザで http://localhost:3000/ にアクセス
+
+
+【データベース】
+・開発環境での動作確認
+    ①開発環境を起動
+        docker compose up --build
+    ②コンテナ内に入ってDBに接続
+        docker ps
+            PostgreSQLコンテナIDを確認
+        docker exec -it <PostgreSQLコンテナID> psql -U myuser -d mydatabase
+            確認できたら\q で終了
+    ③FastAPIのエンドポイントを確認
+        curl http://localhost:8000/db_test
+        または、ブラウザで http://localhost:8000/db_test にアクセス
+・本番環境での動作確認
+    ①本番環境を起動
+        docker-compose -f docker-compose.yml -f docker-compose.prod.yml up --build
+    ②コンテナ内に入ってDBに接続
+        docker ps
+            PostgreSQLコンテナIDを確認
+        docker exec -it <PostgreSQLコンテナID> psql -U myuser -d mydatabase
+            確認できたら\q で終了
+    ③FastAPIのエンドポイントを確認
+        curl http://localhost:8000/db_test
+        または、ブラウザで http://localhost:8000/db_test にアクセス
+
+
