@@ -7,11 +7,18 @@ on:
 
 jobs:
   deploy:
-    runs-on: ubuntu-latest
+    runs-on: macos-latest
     container: ghcr.io/railwayapp/cli:latest
     steps:
+      - name: Wait for Deployment
+        run: |
+          railway logs --service makeMdArticle --tail
+
       - name: Checkout Repository
         uses: actions/checkout@v4
+
+      - name: Debug Railway Token
+        run: echo "RAILWAY_TOKEN=${{ secrets.RAILWAY_TOKEN }}"
 
       - name: Deploy to Railway
         run: railway up --service makeMdArticle
