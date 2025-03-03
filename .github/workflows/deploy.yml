@@ -7,8 +7,7 @@ on:
 
 jobs:
   deploy:
-    runs-on: macos-latest
-    container: ghcr.io/railwayapp/cli:latest
+    runs-on: ubuntu-latest
     steps:
       - name: Wait for Deployment
         run: |
