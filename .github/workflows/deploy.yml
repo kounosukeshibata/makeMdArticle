@@ -8,10 +8,12 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-
+    container: ghcr.io/railwayapp/cli:latest
+    env:
+      RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Install/Update Railway CLI
         run: |
@@ -19,31 +21,13 @@ jobs:
           echo 'export PATH="$HOME/.railway/bin:$PATH"' >> $GITHUB_ENV
 
       - name: Authenticate Railway
-        run: railway login --auth ${{ secrets.RAILWAY_TOKEN }}
+        run: railway login --browserless
 
       - name: Verify Authentication
         run: railway whoami
 
-      - name: Install Python
-        uses: actions/setup-python@v2
-        with:
-          python-version: "3.8"
-
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt
-
-      - name: Run tests
-        run: |
-          pytest
-
       - name: Link Railway Project
-        env:
-          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
         run: railway link --project 2a304d76-4f0f-4f10-8a39-ffb632cca051
 
       - name: Deploy to Railway
-        env:
-          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
         run: railway up --service backend
