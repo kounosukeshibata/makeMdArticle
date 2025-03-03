@@ -1,0 +1,18 @@
+version: "3.8"
+
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.prod # 本番用 Dockerfile
+    ports:
+      - "8000:8000"
+    restart: always # 本番では自動復旧
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.prod # 本番用 Dockerfile
+    ports:
+      - "3000:3000"
+    restart: always

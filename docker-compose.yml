@@ -2,20 +2,14 @@ version: "3.8"
 
 services:
   backend:
-    build: ./backend
-    container_name: backend
-    ports:
-      - "8000:8000"
+    image: backend-image # デフォルトではビルドしない（開発・本番で指定）
     env_file:
       - ./backend/.env
     networks:
       - app_network
 
   frontend:
-    build: ./frontend
-    container_name: frontend
-    ports:
-      - "3000:3000"
+    image: frontend-image # デフォルトではビルドしない（開発・本番で指定）
     env_file:
       - ./frontend/.env.local
     depends_on:

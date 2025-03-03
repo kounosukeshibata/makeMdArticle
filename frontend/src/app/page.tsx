@@ -6,7 +6,10 @@ export default function Home() {
   const [message, setMessage] = useState("");
 
   useEffect(() => {
-    fetch("http://backend:8000/")
+    const backendUrl =
+      process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8000/";
+    // fetch("http://backend:8000/")
+    fetch(backendUrl)
       .then((res) => res.json())
       .then((data) => setMessage(data.message))
       .catch((error) => console.error("Error fetching data:", error));
