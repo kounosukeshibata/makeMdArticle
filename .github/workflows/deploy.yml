@@ -13,11 +13,7 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
 
-      - name: Verify Authentication
-        run: RAILWAY_TOKEN=${{ secrets.RAILWAY_TOKEN }} railway whoami
-
-      - name: Link Railway Project
-        run: RAILWAY_TOKEN=${{ secrets.RAILWAY_TOKEN }} railway link --project 2a304d76-4f0f-4f10-8a39-ffb632cca051
-
       - name: Deploy to Railway
-        run: RAILWAY_TOKEN=${{ secrets.RAILWAY_TOKEN }} railway up --service backend
+        run: railway up --service backend
+        env:
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
