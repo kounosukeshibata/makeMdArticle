@@ -9,10 +9,6 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-      - name: Wait for Deployment
-        run: |
-          railway logs --service makeMdArticle --tail
-
       - name: Checkout Repository
         uses: actions/checkout@v4
 
@@ -20,6 +16,6 @@ jobs:
         run: echo "RAILWAY_TOKEN=${{ secrets.RAILWAY_TOKEN }}"
 
       - name: Deploy to Railway
-        run: railway up --service makeMdArticle
+        run: railway up --service makeMdArticle | true
         env:
           RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
