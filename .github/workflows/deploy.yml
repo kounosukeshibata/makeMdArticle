@@ -13,15 +13,7 @@ jobs:
       RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v3
-
-      - name: Install/Update Railway CLI
-        run: |
-          curl -fsSL https://railway.app/install.sh | sh
-          echo 'export PATH="$HOME/.railway/bin:$PATH"' >> $GITHUB_ENV
-
-      - name: Authenticate Railway
-        run: railway login --browserless
+        uses: actions/checkout@v4
 
       - name: Verify Authentication
         run: railway whoami
