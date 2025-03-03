@@ -14,7 +14,9 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Install/Update Railway CLI
-        run: curl -fsSL https://raw.githubusercontent.com/railwayapp/cli/main/install.sh | sh
+        run: |
+          curl -fsSL https://raw.githubusercontent.com/railwayapp/cli/main/install.sh | sh
+          echo "$HOME/.railway/bin" >> $GITHUB_PATH
 
       - name: Authenticate Railway
         run: railway login --auth ${{ secrets.RAILWAY_TOKEN }}
