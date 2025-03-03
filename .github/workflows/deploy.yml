@@ -19,7 +19,7 @@ jobs:
       - name: Authenticate Railway
         env:
           RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
-        run: echo $RAILWAY_TOKEN | railway login --no-interactive
+        run: echo $RAILWAY_TOKEN | railway login
 
       - name: Link Railway Project
         env:
