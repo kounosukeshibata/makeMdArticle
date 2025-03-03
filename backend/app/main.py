@@ -1,5 +1,7 @@
 import os
-from fastapi import FastAPI
+from fastapi import FastAPI, Depends
+from sqlalchemy.orm import Session
+from app.database import SessionLocal, engine
 from dotenv import load_dotenv
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -16,6 +18,18 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# DB セッションを取得する関数
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
+
+@app.get("/db_test")
+def db_test(db: Session = Depends(get_db)):
+    return {"message": "Database connection successful"}
 
 @app.get("/")
 def read_root():
