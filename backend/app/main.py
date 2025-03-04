@@ -4,6 +4,7 @@ from sqlalchemy.orm import Session
 from app.database import SessionLocal, engine
 from dotenv import load_dotenv
 from fastapi.middleware.cors import CORSMiddleware
+from app.api.github import router as github_router
 
 # .envを読み込む
 load_dotenv()
@@ -34,3 +35,7 @@ def db_test(db: Session = Depends(get_db)):
 @app.get("/")
 def read_root():
     return {"message": f"Hello from FastAPI! Debug Mode: {os.getenv('DEBUG')}"}
+
+
+# ルーターを登録
+app.include_router(github_router, prefix="/api")
