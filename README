@@ -1,4 +1,4 @@
-本プロジェクトのDockerコンテナやDockerコンポーズの運用方法について記載します。
+本プロジェクトのDockerコンテナやDockerコンポーズの運用方法、デプロイ時の運用について記載します。
 データベースの接続確認方法も記載します。
 
 
@@ -85,3 +85,17 @@
         または、ブラウザで http://localhost:8000/db_test にアクセス
 
 
+【デプロイ】
+・フロントエンド（Vercel）
+    このGitリポジトリを選択し、ルートディレクトリをfrontendに設定。
+    NEXT_PUBLIC_BACKEND_URL=https://api.example.com を環境変数に設定。
+・バックエンド（Railway）
+    Railwayのプロジェクトを作成し、このGitリポジトリを選択。
+    環境変数RAILWAY_TOKENを設定し、GitHubの環境変数として登録。
+    RAILWAY_TOKENの値は、RailwayのプロジェクトページのSettings > Environment Variables から取得。
+    その他、必要な環境変数を設定。
+    データベースの接続情報は、RailwayのプロジェクトページのSettings > Databases から取得。
+    データベースの接続情報をFastAPIの設定ファイルに設定。
+    データベースの接続情報をVercelの環境変数に設定。
+    GitHub Actionsのワークフローを設定し、mainブランチにpushすると自動デプロイされるようにする。
+    
