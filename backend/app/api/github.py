@@ -12,27 +12,32 @@ HEADERS = {"Authorization": f"token {GITHUB_API_TOKEN}"} if GITHUB_API_TOKEN els
 
 
 @router.get("/github/repo-contents")
-async def get_repo_contents(owner: str, repo: str, path: str = ""):
+def get_repo_contents(owner: str, repo: str, path: str = ""):
     """GitHubのリポジトリのファイル構造を取得"""
     url = f"{GITHUB_API_URL}/{owner}/{repo}/contents/{path}"
     
-    async with httpx.AsyncClient() as client:
-        response = await client.get(url)
-        if response.status_code != 200:
-            return {"error": "Failed to fetch repository contents"}
+    response = requests.get(url, headers=HEADERS)
+    
+    if response.status_code >= 400 and response.status_code < 500:
+        raise HTTPException(status_code=400, detail="Bad Request: GitHub API request failed (Client Error)")
+    elif response.status_code >= 500:
+        raise HTTPException(status_code=500, detail="Internal Server Error: GitHub API request failed (Server Error)")
     
     return response.json()
 
 
 @router.get("/github/file")
-def get_github_file(owner: str, repo: str, path: str, branch: str = "main"):
+async def get_github_file(owner: str, repo: str, path: str, branch: str = "main"):
     """ GitHub のファイル内容を取得する """
     url = f"{GITHUB_API_URL}/{owner}/{repo}/contents/{path}?ref={branch}"
     
-    response = requests.get(url, headers=HEADERS)
-
-    if response.status_code != 200:
-        raise HTTPException(status_code=response.status_code, detail="GitHub API request failed")
+    async with httpx.AsyncClient() as client:
+        response = await client.get(url, headers=HEADERS)
+        
+        if response.status_code >= 400 and response.status_code < 500:
+            raise HTTPException(status_code=400, detail="Bad Request: GitHub API request failed (Client Error)")
+        elif response.status_code >= 500:
+            raise HTTPException(status_code=500, detail="Internal Server Error: GitHub API request failed (Server Error)")
     
     data = response.json()
     
