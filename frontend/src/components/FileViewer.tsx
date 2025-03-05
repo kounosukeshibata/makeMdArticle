@@ -7,13 +7,24 @@ interface FileViewerProps {
   owner: string;
   repo: string;
   filePath: string;
+  setErrorMessage: (message: string) => void;
 }
 
-export default function FileViewer({ owner, repo, filePath }: FileViewerProps) {
+export default function FileViewer({
+  owner,
+  repo,
+  filePath,
+  setErrorMessage,
+}: FileViewerProps) {
   const [fileContent, setFileContent] = useState<string | null>(null);
 
   const handleFileClick = async () => {
-    const content = await fetchFileFromBackend(owner, repo, filePath);
+    const content = await fetchFileFromBackend(
+      owner,
+      repo,
+      filePath,
+      setErrorMessage
+    );
     setFileContent(content);
   };
 

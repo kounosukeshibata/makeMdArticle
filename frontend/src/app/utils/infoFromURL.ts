@@ -3,7 +3,6 @@ export function getInfoFromRepoURL(
 ): { owner: string; repo: string } | null {
   const match = repoUrl.match(/github\.com\/([^\/]+)\/([^\/]+)/);
   if (!match) {
-    alert("正しいGitHubリポジトリURLを入力してください");
     return null;
   }
   const owner = match[1];

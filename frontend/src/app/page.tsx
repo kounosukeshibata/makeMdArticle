@@ -15,17 +15,7 @@ export default function Home() {
   const [fileTree, setFileTree] = useState<any[]>([]);
   const [selectedFile, setSelectedFile] = useState<string | null>(null);
   const [repoInfo, setRepoInfo] = useState<repoInfoProps | null>(null);
-
-  // repoUrl が変更されたら、URLから owner と repo を抽出
-  useEffect(() => {
-    if (repoUrl) {
-      const info = getInfoFromRepoURL(repoUrl);
-      if (!info) {
-        return;
-      }
-      setRepoInfo(info);
-    }
-  }, [repoUrl]);
+  const [errorMessage, setErrorMessage] = useState("");
 
   // GitHubリポジトリのファイル構造を取得
   const fetchRepoContents = async () => {
@@ -33,17 +23,34 @@ export default function Home() {
       alert("GitHubリポジトリURLを入力してください");
       return;
     }
-    if (!repoInfo) {
+    // URLから owner と repo を抽出
+    const info = getInfoFromRepoURL(repoUrl);
+    if (!info) {
+      alert("正しいGitHubリポジトリURLを入力してください");
       return;
     }
+    setRepoInfo(info);
 
-    // FastAPIのエンドポイントを叩く
-    const response = await fetch(
-      `http://localhost:8000/api/github/repo-contents?owner=${repoInfo.owner}&repo=${repoInfo.repo}`
-    );
+    try {
+      if (!repoInfo) {
+        throw new Error("Failed to get repository info");
+      }
 
-    const data = await response.json();
-    setFileTree(data);
+      // FastAPIのエンドポイントを叩き、ファイルツリーを取得
+      const response = await fetch(
+        `http://localhost:8000/api/github/repo-contents?owner=${repoInfo.owner}&repo=${repoInfo.repo}`
+      );
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(
+          errorData.detail || "Failed to fetch file tree from GitHub"
+        );
+      }
+      const data = await response.json();
+      setFileTree(data);
+    } catch (error) {
+      setErrorMessage((error as Error).message);
+    }
   };
 
   // 選択されたファイルをセット
@@ -81,6 +88,7 @@ export default function Home() {
       >
         取得
       </button>
+      {errorMessage && <div className="text-red font-bold">{errorMessage}</div>}
       {/* TODO: ファイル階層にするために再起処理を追加（後でこのコメント自体も見直す） */}
       <ul className="mt-4 pl-2 list-none">
         {fileTree.map((item) => (
@@ -98,6 +106,7 @@ export default function Home() {
           owner={repoInfo.owner}
           repo={repoInfo.repo}
           filePath={selectedFile}
+          setErrorMessage={setErrorMessage}
         />
       )}
       <p className="mt-4 text-lg">バックエンドからのメッセージ: {message}</p>
