@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 import { fetchFileFromBackend } from "../app/utils/githubApi";
+import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
+import { oneDark } from "react-syntax-highlighter/dist/esm/styles/prism";
 
 interface FileViewerProps {
   owner: string;
@@ -39,7 +41,9 @@ export default function FileViewer({
 
       {fileContent && (
         <pre className="border p-4 bg-gray-100 overflow-auto">
-          <code>{fileContent}</code>
+          <SyntaxHighlighter language="javascript" style={oneDark}>
+            {fileContent}
+          </SyntaxHighlighter>
         </pre>
       )}
     </div>

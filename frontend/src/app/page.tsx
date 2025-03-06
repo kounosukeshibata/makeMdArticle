@@ -19,6 +19,7 @@ export default function Home() {
 
   // GitHubリポジトリのファイル構造を取得
   const fetchRepoContents = async () => {
+    setErrorMessage("");
     if (!repoUrl) {
       alert("GitHubリポジトリURLを入力してください");
       return;
@@ -32,13 +33,9 @@ export default function Home() {
     setRepoInfo(info);
 
     try {
-      if (!repoInfo) {
-        throw new Error("Failed to get repository info");
-      }
-
       // FastAPIのエンドポイントを叩き、ファイルツリーを取得
       const response = await fetch(
-        `http://localhost:8000/api/github/repo-contents?owner=${repoInfo.owner}&repo=${repoInfo.repo}`
+        `http://localhost:8000/api/github/repo-contents?owner=${info.owner}&repo=${info.repo}`
       );
       if (!response.ok) {
         const errorData = await response.json();
