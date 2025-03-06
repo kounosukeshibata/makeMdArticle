@@ -69,9 +69,9 @@ export default function Home() {
   return (
     <main className="p-4">
       <h1 className="text-2xl font-bold">技術記事自動生成 & 最適化ツール</h1>
-      <h2 className="text-2xl font-bold mb-4">
+      <h1 className="text-1xl font-bold mt-8 mb-4">
         GitHubリポジトリのファイル構造を取得
-      </h2>
+      </h1>
       <input
         type="text"
         placeholder="GitHubリポジトリのURLを入力"
