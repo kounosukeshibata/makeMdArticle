@@ -1,36 +1,61 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { getInfoFromRepoURL } from "./utils/infoFromURL";
+import FileViewer from "../components/FileViewer";
+
+type repoInfoProps = {
+  owner: string;
+  repo: string;
+};
 
 export default function Home() {
   const [message, setMessage] = useState("");
   const [repoUrl, setRepoUrl] = useState("");
   const [fileTree, setFileTree] = useState<any[]>([]);
+  const [selectedFile, setSelectedFile] = useState<string | null>(null);
+  const [repoInfo, setRepoInfo] = useState<repoInfoProps | null>(null);
+  const [errorMessage, setErrorMessage] = useState("");
 
+  // GitHubリポジトリのファイル構造を取得
   const fetchRepoContents = async () => {
+    setErrorMessage("");
     if (!repoUrl) {
       alert("GitHubリポジトリURLを入力してください");
       return;
     }
-
     // URLから owner と repo を抽出
-    const match = repoUrl.match(/github\.com\/([^\/]+)\/([^\/]+)/);
-    if (!match) {
+    const info = getInfoFromRepoURL(repoUrl);
+    if (!info) {
       alert("正しいGitHubリポジトリURLを入力してください");
       return;
     }
-    const owner = match[1];
-    const repo = match[2];
+    setRepoInfo(info);
 
-    // FastAPIのエンドポイントを叩く
-    const response = await fetch(
-      `http://localhost:8000/api/github/repo-contents?owner=${owner}&repo=${repo}`
-    );
-    const data = await response.json();
-    console.log(data);
-    setFileTree(data);
+    try {
+      // FastAPIのエンドポイントを叩き、ファイルツリーを取得
+      const response = await fetch(
+        `http://localhost:8000/api/github/repo-contents?owner=${info.owner}&repo=${info.repo}`
+      );
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(
+          errorData.detail || "Failed to fetch file tree from GitHub"
+        );
+      }
+      const data = await response.json();
+      setFileTree(data);
+    } catch (error) {
+      setErrorMessage((error as Error).message);
+    }
   };
 
+  // 選択されたファイルをセット
+  const handleSelectedFile = (filePath: string) => {
+    setSelectedFile(filePath);
+  };
+
+  // バックエンドからのメッセージを取得（テスト用）
   useEffect(() => {
     const backendUrl =
       process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8000/";
@@ -44,9 +69,9 @@ export default function Home() {
   return (
     <main className="p-4">
       <h1 className="text-2xl font-bold">技術記事自動生成 & 最適化ツール</h1>
-      <h2 className="text-2xl font-bold mb-4">
+      <h1 className="text-1xl font-bold mt-8 mb-4">
         GitHubリポジトリのファイル構造を取得
-      </h2>
+      </h1>
       <input
         type="text"
         placeholder="GitHubリポジトリのURLを入力"
@@ -60,13 +85,27 @@ export default function Home() {
       >
         取得
       </button>
+      {errorMessage && <div className="text-red font-bold">{errorMessage}</div>}
+      {/* TODO: ファイル階層にするために再起処理を追加（後でこのコメント自体も見直す） */}
       <ul className="mt-4 pl-2 list-none">
         {fileTree.map((item) => (
-          <li key={item.path} className="list-none">
+          <li
+            key={item.path}
+            className="list-none cursor-pointer"
+            onClick={() => handleSelectedFile(item.path)}
+          >
             {item.type === "dir" ? "📁" : "📄"} {item.name}
           </li>
         ))}
       </ul>
+      {repoInfo && selectedFile && (
+        <FileViewer
+          owner={repoInfo.owner}
+          repo={repoInfo.repo}
+          filePath={selectedFile}
+          setErrorMessage={setErrorMessage}
+        />
+      )}
       <p className="mt-4 text-lg">バックエンドからのメッセージ: {message}</p>
     </main>
   );
